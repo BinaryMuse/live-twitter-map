@@ -33,7 +33,7 @@ twit = new twitter.TwitterNode
   user:     process.env.TWITTER_USER
   password: process.env.TWITTER_PASS
   # Search for Geo-tagged tweets in the US
-  locations: [-123.837891, 26.273714, -58.710937, 49.837982]
+  locations: [-127, 25, -58, 49]
 
 # Number of tweets processed
 count   = 0
