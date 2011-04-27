@@ -11,6 +11,10 @@ $ ->
   update_counter = (count) ->
     $("#counter").html("#{count}")
 
+  disconnected = ->
+    $("#title").html("DISCONNECTED<br />Please refresh the page.")
+    $("#title").css("color", "#ff0000")
+
   # Remove a marker from the map
   remove_marker = (marker) ->
     marker.setMap null
@@ -51,3 +55,5 @@ $ ->
       add_marker lat, lon, user, image, text, 10000
       counter++
     update_counter(counter)
+  socket.on 'disconnect', ->
+    disconnected()
