@@ -32,6 +32,8 @@ $ ->
         "<img src='#{image}' align='left'>" +
         "<a href='http://twitter.com/#{user}' target='_blank'>@#{user}</a>: #{tweet}" + 
         "</div>"
+      disableAutoPan: true
+      maxWidth: 350
     google.maps.event.addListener marker, 'click', ->
       infowindow.open marker.map, marker
     if timeout?
