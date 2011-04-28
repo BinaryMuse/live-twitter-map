@@ -1,4 +1,11 @@
 $ ->
+  # Initialize the counter to zero
+  window.counter             = 0
+  # Reference to the currently-auto-opened info window, if any
+  window.current_info_window = null
+  # Percent chance that a tweet will auto-open if none are showing
+  window.auto_show_chance    = 10
+
   # Create our Google Map object
   start_location = new google.maps.LatLng(40, -95)
   map_options =
@@ -6,6 +13,10 @@ $ ->
     center: start_location
     mapTypeId: google.maps.MapTypeId.HYBRID
   window.Map = new google.maps.Map(document.getElementById('map_canvas'), map_options)
+
+  # Roll a random percent chance
+  random_percent = ->
+    Math.floor Math.random() * 101
 
   # Update the counter in the lower-right
   update_counter = (count) ->
@@ -17,6 +28,8 @@ $ ->
 
   # Remove a marker from the map
   remove_marker = (marker) ->
+    if marker.auto_info?
+      window.current_info_window = null
     marker.setMap null
 
   # Add a marker to the map
@@ -30,17 +43,18 @@ $ ->
     infowindow = new google.maps.InfoWindow
       content: "<div class='info'>" +
         "<img src='#{image}' align='left'>" +
-        "<a href='http://twitter.com/#{user}' target='_blank'>@#{user}</a>: #{tweet}" + 
+        "<a href='http://twitter.com/#{user}' target='_blank'>@#{user}</a>: #{tweet}" +
         "</div>"
       disableAutoPan: true
       maxWidth: 350
     google.maps.event.addListener marker, 'click', ->
       infowindow.open marker.map, marker
+    if window.current_info_window == null && random_percent() < window.auto_show_chance
+      infowindow.open marker.map, marker
+      marker.auto_info = true
+      window.current_info_window = true
     if timeout?
       setTimeout (-> remove_marker(marker)), timeout
-
-  # Initialize the counter to zero
-  counter = 0
 
   # Start our Socket.IO socket
   socket = new io.Socket
@@ -55,7 +69,7 @@ $ ->
       text  = obj.text
       image = obj.image
       add_marker lat, lon, user, image, text, 10000
-      counter++
-    update_counter(counter)
+      window.counter++
+    update_counter(window.counter)
   socket.on 'disconnect', ->
     disconnected()
