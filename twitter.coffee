@@ -76,7 +76,7 @@ twit.addListener 'end', (resp) ->
   if resp.statusCode == 200
     twit.stream()
   else
-    setTimeout (-> twit.stream()), 5 * 1000
+    setTimeout (-> twit.stream()), 5 * 60 * 1000
 
 # Start reading from the Streaming API
 twit.stream()
