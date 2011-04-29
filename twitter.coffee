@@ -73,6 +73,10 @@ twit.addListener 'delete', (del) ->
   sys.puts "DELETE: #{sys.inspect del}"
 twit.addListener 'end', (resp) ->
   sys.puts "END: #{resp.statusCode}"
+  if resp.statusCode == 200
+    twit.stream()
+  else
+    setTimeout (-> twit.stream()), 5 * 1000
 
 # Start reading from the Streaming API
 twit.stream()
