@@ -78,7 +78,7 @@ $ ->
       infowindow
 
     add_marker: (lat, lng, user, image, tweet, autoshow, timeout = null) ->
-      marker = @marker_for lat, lng, user, image
+      marker     = @marker_for lat, lng, user, image
       infowindow = @info_window_for image, user, tweet
       if timeout?
         marker.timeout = setTimeout (=> @remove_marker(marker)), timeout
@@ -90,6 +90,7 @@ $ ->
           # Reset the timeout for the marker when it's clicked
           clearTimeout marker.timeout
           marker.timeout = setTimeout (=> @remove_marker(marker)), timeout
+
       # If we've chosen this tweet to auto-show, and one isn't showing, show it
       if autoshow == true && @infowindow == false
         setTimeout (=> infowindow.open @map, marker), 1000 # 1 sec to allow image to load
