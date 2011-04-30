@@ -49,12 +49,15 @@ $ ->
       maxWidth: 350
     google.maps.event.addListener marker, 'click', ->
       infowindow.open marker.map, marker
+      if marker.timeout?
+        clearTimeout marker.timeout
+        marker.timeout = setTimeout (-> remove_marker(marker)), timeout
     if window.current_info_window == null && random_percent() < window.auto_show_chance
       infowindow.open marker.map, marker
       marker.auto_info = true
       window.current_info_window = true
     if timeout?
-      setTimeout (-> remove_marker(marker)), timeout
+      marker.timeout = setTimeout (-> remove_marker(marker)), timeout
 
   # Start our Socket.IO socket
   socket = new io.Socket
