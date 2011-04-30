@@ -35,11 +35,15 @@ $ ->
   # Add a marker to the map
   add_marker = (lat, lng, user, image, tweet, timeout = null) ->
     goog_image = new google.maps.MarkerImage(image, new google.maps.Size(48, 48))
+    shadow_image = new google.maps.MarkerImage(
+      '/map_shadow.png', null,
+      null, new google.maps.Point(18, 26))
     marker = new google.maps.Marker
       position: new google.maps.LatLng(lat, lng)
       map: window.Map
       title: user
       icon: goog_image
+      shadow: shadow_image
     infowindow = new google.maps.InfoWindow
       content: "<div class='info'>" +
         "<img src='#{image}' align='left'>" +
