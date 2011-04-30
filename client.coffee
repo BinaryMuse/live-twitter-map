@@ -1,82 +1,104 @@
 $ ->
-  # Initialize the counter to zero
-  window.counter             = 0
-  # Reference to the currently-auto-opened info window, if any
-  window.current_info_window = null
-  # Percent chance that a tweet will auto-open if none are showing
-  window.auto_show_chance    = 10
+  # Redefine some google.maps namespaced objects for ease-of-access
+  window.MarkerImage = google.maps.MarkerImage
+  window.Marker      = google.maps.Marker
+  window.Point       = google.maps.Point
+  window.LatLng      = google.maps.LatLng
+  window.Size        = google.maps.Size
+  window.InfoWindow  = google.maps.InfoWindow
 
-  # Create our Google Map object
-  start_location = new google.maps.LatLng(40, -95)
-  map_options =
-    zoom: 5
-    center: start_location
-    mapTypeId: google.maps.MapTypeId.HYBRID
-  window.Map = new google.maps.Map(document.getElementById('map_canvas'), map_options)
+  # LiveMap is our "Model"
+  class LiveMap
+    constructor: (@auto_show_chance, start_location, zoom_level) ->
+      @view    = new LiveMapView(start_location, zoom_level)
+      @counter = 0
+      @setup_socket()
 
-  # Roll a random percent chance
-  random_percent = ->
-    Math.floor Math.random() * 101
+    setup_socket: ->
+      socket = new io.Socket
+      socket.connect()
+      socket.on 'message', (data) =>
+        # Iterate over the array of tweets stored in data.tweets and add them to the map
+        for tweet in data.tweets
+          auto_show = @random_percent() < @auto_show_chance
+          lat       = tweet.lat
+          lng       = tweet.lon
+          user      = tweet.user
+          text      = tweet.text
+          image     = tweet.image
+          @view.add_marker lat, lng, user, image, text, auto_show, 10000
+          @counter++
+        # Update the view's counter after we've processed *all* the tweets
+        @view.update_counter(@counter)
+      socket.on 'disconnect', =>
+        @view.disconnected()
 
-  # Update the counter in the lower-right
-  update_counter = (count) ->
-    $("#counter").html("#{count}")
+    random_percent: ->
+      # Return a random number between 1 and 100
+      Math.floor Math.random() * 100 + 1
 
-  disconnected = ->
-    $("#title").html("DISCONNECTED<br />Please refresh the page.")
-    $("#title").css("color", "#ff0000")
+  # LiveMapView is our view and handles all the modification of the Google map and HTML
+  class LiveMapView
+    constructor: (start_location, zoom_level) ->
+      options =
+        zoom:      zoom_level
+        center:    start_location
+        mapTypeId: google.maps.MapTypeId.HYBRID
+      @map        = new google.maps.Map(document.getElementById('map_canvas'), options)
+      @counter    = $ "#counter"
+      @title      = $ "#title"
+      @infowindow = false # whether or not an InfoWindow is "auto-showing" right now
 
-  # Remove a marker from the map
-  remove_marker = (marker) ->
-    if marker.auto_info?
-      window.current_info_window = null
-    marker.setMap null
+    update_counter: (count) ->
+      @counter.text count
 
-  # Add a marker to the map
-  add_marker = (lat, lng, user, image, tweet, timeout = null) ->
-    goog_image = new google.maps.MarkerImage(image, new google.maps.Size(48, 48))
-    shadow_image = new google.maps.MarkerImage(
-      '/map_shadow.png', null,
-      null, new google.maps.Point(18, 26))
-    marker = new google.maps.Marker
-      position: new google.maps.LatLng(lat, lng)
-      map: window.Map
-      title: user
-      icon: goog_image
-      shadow: shadow_image
-    infowindow = new google.maps.InfoWindow
-      content: "<div class='info'>" +
-        "<img src='#{image}' align='left'>" +
-        "<a href='http://twitter.com/#{user}' target='_blank'>@#{user}</a>: #{tweet}" +
-        "</div>"
-      disableAutoPan: true
-      maxWidth: 350
-    google.maps.event.addListener marker, 'click', ->
-      infowindow.open marker.map, marker
-      if marker.timeout?
-        clearTimeout marker.timeout
-        marker.timeout = setTimeout (-> remove_marker(marker)), timeout
-    if window.current_info_window == null && random_percent() < window.auto_show_chance
-      infowindow.open marker.map, marker
-      marker.auto_info = true
-      window.current_info_window = true
-    if timeout?
-      marker.timeout = setTimeout (-> remove_marker(marker)), timeout
+    disconnected: ->
+      @title.html "DISCONNECTED<br />Please refresh the page."
+      @title.css  "color", "#ff0000"
 
-  # Start our Socket.IO socket
-  socket = new io.Socket
-  socket.connect()
-  socket.on 'message', (data) ->
-    # When tweets come in, iterate over them and add a marker to the map for 10 seconds
-    for obj in data.tweets
-      console.log "Found an object"
-      lat   = obj.lat
-      lon   = obj.lon
-      user  = obj.user
-      text  = obj.text
-      image = obj.image
-      add_marker lat, lon, user, image, text, 10000
-      window.counter++
-    update_counter(window.counter)
-  socket.on 'disconnect', ->
-    disconnected()
+    marker_for: (lat, lng, user, image) ->
+      user_image   = new MarkerImage(image, new Size(48, 48))
+      shadow_image = new MarkerImage('/map_shadow.png', null, null, new Point(18, 26))
+      marker       = new Marker
+        position: new LatLng(lat, lng)
+        map:      @map
+        title:    user
+        icon:     user_image
+        shadow:   shadow_image
+      marker
+
+    info_window_for: (image, user, tweet) ->
+      infowindow = new InfoWindow
+        content: "<div class='info'>" +
+          "<img src='#{image}' align='left'>" +
+          "<a href='http://twitter.com/#{user}' target='_blank'>@#{user}</a>: #{tweet}" +
+          "</div>"
+        disableAutoPan: true
+        maxWidth: 350
+      infowindow
+
+    add_marker: (lat, lng, user, image, tweet, autoshow, timeout = null) ->
+      marker = @marker_for lat, lng, user, image
+      infowindow = @info_window_for image, user, tweet
+      if timeout?
+        marker.timeout = setTimeout (=> @remove_marker(marker)), timeout
+
+      # Show the InfoWindow when the marker is clicked
+      google.maps.event.addListener marker, 'click', =>
+        infowindow.open @map, marker
+        if marker.timeout?
+          # Reset the timeout for the marker when it's clicked
+          clearTimeout marker.timeout
+          marker.timeout = setTimeout (=> @remove_marker(marker)), timeout
+      # If we've chosen this tweet to auto-show, and one isn't showing, show it
+      if autoshow == true && @infowindow == false
+        setTimeout (=> infowindow.open @map, marker), 1000 # 1 sec to allow image to load
+        marker.auto_infowindow = infowindow
+        @infowindow = true
+
+    remove_marker: (marker) =>
+      marker.setMap null
+      @infowindow = false if marker.auto_infowindow
+
+  # Create a new map with a 10% auto-show chance, centered on the US at zoom level 5
+  window.Map = new LiveMap 10, new LatLng(40, -95), 5
