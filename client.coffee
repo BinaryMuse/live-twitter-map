@@ -97,7 +97,7 @@ $ ->
         marker.auto_infowindow = infowindow
         @infowindow = true
 
-    remove_marker: (marker) =>
+    remove_marker: (marker) ->
       marker.setMap null
       @infowindow = false if marker.auto_infowindow
 
