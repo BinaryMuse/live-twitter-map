@@ -8,21 +8,11 @@ fs      = require 'fs'
 
 # Set up the Express web server
 app = express.createServer()
+app.configure ->
+  app.use express.static(__dirname);
 # The client web page
 app.get '/', (req, res) ->
-  fs.readFile 'client.htm', (err, file) ->
-    res.writeHead 200, {'Content-Type': 'text/html'}
-    res.end file
-# The in-browser CoffeeScript compiler
-app.get '/coffee-script.js', (req, res) ->
-  fs.readFile 'coffee-script.js', (err, file) ->
-    res.writeHead 200, {'Content-Type': 'text/javascript'}
-    res.end file
-# The CoffeeScript client script
-app.get '/client.coffee', (req, res) ->
-  fs.readFile 'client.coffee', (err, file) ->
-    res.writeHead 200, {'Content-Type': 'text/coffeescript'}
-    res.end file
+  res.sendfile "client.htm"
 app.listen 8080
 
 # Attach Socket.IO to the web server
