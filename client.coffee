@@ -9,8 +9,7 @@ $ ->
 
   # LiveMap is our "Model"
   class LiveMap
-    constructor: (@auto_show_chance, start_location, zoom_level) ->
-      @view    = new LiveMapView(start_location, zoom_level)
+    constructor: (@auto_show_chance, @view) ->
       @counter = 0
       @setup_socket()
 
@@ -102,4 +101,5 @@ $ ->
       @infowindow = false if marker.auto_infowindow
 
   # Create a new map with a 10% auto-show chance, centered on the US at zoom level 5
-  window.Map = new LiveMap 10, new LatLng(40, -95), 5
+  window.view = new LiveMapView new LatLng(40, -95), 5
+  window.Map  = new LiveMap 10, view
