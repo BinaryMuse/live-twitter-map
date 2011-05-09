@@ -13,10 +13,10 @@ You can run this on your own if you have Node.js installed.
 1. Clone the repository
 2. Install the dependencies:
 
-        npm install coffee-script twitter-node express socket.io
+        npm install
 
 3. Run the server using your Twitter credentials:
 
-        TWITTER_USER=YourUsername TWITTER_PASS=your_password ./twitter.coffee
+        TWITTER_USER=YourUsername TWITTER_PASS=your_password ./bin/twimap.js
 
 By default the server binds to port 8080, so you can check it out at [http://localhost:8080](http://localhost:8080).
