@@ -1,0 +1,28 @@
+{
+  "name":        "live-twitter-map",
+  "description": "Show tweets from the Twitter streaming API live on a map",
+  "keywords":    ["twitter", "live", "map"],
+  "version":     "1.0.0",
+  "homepage":    "https://github.com/BinaryMuse/live-twitter-map",
+  "author":      "Brandon Tilley <brandon@brandontilley.com> (http://brandontilley.com)",
+  "repository": {
+    "type": "git",
+    "url":  "git://github.com/BinaryMuse/live-twitter-map.git"
+  },
+  "engines": {
+    "node": ">= 0.4.0"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "main": "./lib/live-twitter-map",
+  "bin": {
+    "twimap": "./bin/twimap.js"
+  },
+  "dependencies": {
+    "twitter-node":  "",
+    "coffee-script": "",
+    "express":       "",
+    "socket.io":     ""
+  }
+}
