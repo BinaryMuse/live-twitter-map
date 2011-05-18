@@ -3,7 +3,7 @@ This is a small project I put together to experiment with the Twitter Streaming 
 Demo
 ====
 
-Check out the [working demo](http://www.twitmap.dotcloud.com/). If it's down, either I'm updating it or it totally crashed the server. ;) Feel free to send me a message or an email if you can't get to the demo.
+Check out the [working demo](http://brandontilley.com:8080/). If it's down, either I'm updating it or it totally crashed the server. ;) Feel free to send me a message or an email if you can't get to the demo.
 
 Getting it to Work for You
 ==========================
