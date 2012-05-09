@@ -22,3 +22,5 @@ You can run this on your own if you have Node.js installed.
    You'll need to register for an application at https://dev.twitter.com/apps/new to receive the relevant credentials.
 
 By default the server binds to port 8080, so you can check it out at [http://localhost:8080](http://localhost:8080).
+
+Note that, to conserve bandwidth, the application will stop streaming from Twitter if it detects that no clients are connected.

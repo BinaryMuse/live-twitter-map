@@ -9,6 +9,8 @@ exports.LiveTwitterMap = class LiveTwitterMap
   constructor: (port) ->
     @create_web_server port
 
+    # Number of connected clients
+    @clients = 0
     # Number of tweets processed
     @count   = 0
     # Time in seconds since the server started
@@ -29,18 +31,35 @@ exports.LiveTwitterMap = class LiveTwitterMap
 
     # Attach Socket.IO to the web server
     @socket = io.listen app
+    @socket.set 'log level', 1
+    @socket.on 'connection', (socket) =>
+      console.log "New connection"
+      @clients++
+      @checkStream()
 
-  stream: =>
+      socket.on 'disconnect', =>
+        @clients--
+        @checkStream()
+
+  checkStream: =>
+    if @clients > 0 && !@stream?
+      @startStream()
+    else if @clients <= 0 && @stream
+      @stopStream()
+
+  startStream: =>
     # Create the Twitter streaming connection
-    api = new twitter
+    console.log "Starting stream"
+    @api = new twitter
       consumer_key: process.env.TWITTER_KEY
       consumer_secret: process.env.TWITTER_SECRET
       access_token_key: process.env.TWITTER_TOKEN
       access_token_secret: process.env.TWITTER_TOKEN_SECRET
-    api.verifyCredentials (err, data) ->
+    @api.verifyCredentials (err, data) ->
       throw err if err?
       console.log "Authenticated with Twitter"
-    api.stream 'statuses/filter', locations: [-127, 25, -58, 49], (stream) =>
+    @api.stream 'statuses/filter', locations: [-127, 25, -58, 49], (stream) =>
+      @stream = stream
       stream.on 'error', (err) =>
         throw err
       stream.on 'data', (tweet) =>
@@ -55,20 +74,27 @@ exports.LiveTwitterMap = class LiveTwitterMap
       stream.on 'end', (resp) =>
         sys.puts "END: #{resp.statusCode}"
         if resp.statusCode == 200
-          @stream()
+          @checkStream()
         else
-          setTimeout (=> @stream()), 5 * 60 * 1000
+          setTimeout (=> @checkStream()), 5 * 60 * 1000
+
+  stopStream: =>
+    if @stream?
+      console.log "Stopping stream"
+      @stream.destroy()
+      @stream = null
 
   run: =>
     # Start the timer
     setInterval (=> @time++), 1000
-    # Start reading from the Streaming API
-    @stream()
+    # Potentially start reading from the Streaming API
+    @checkStream()
     # Send new tweets to the client every 1/4 second
     setInterval @broadcast_tweets, 250
 
   # Send the tweet backlog to the clients and reset the backlog
   broadcast_tweets: =>
+    return unless @clients > 0
     backlog = unescape(encodeURIComponent(JSON.stringify(@backlog)))
     @socket.sockets.emit 'tweets', backlog
     @backlog = []
