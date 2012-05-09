@@ -14,11 +14,11 @@ $ ->
       @setup_socket()
 
     setup_socket: ->
-      socket = new io.Socket
-      socket.connect()
-      socket.on 'message', (data) =>
+      socket = io.connect()
+      socket.on 'tweets', (tweets) =>
+        data = JSON.parse(decodeURIComponent(escape(tweets)))
         # Iterate over the array of tweets stored in data.tweets and add them to the map
-        for tweet in data.tweets
+        for tweet in data
           auto_show = @random_percent() < @auto_show_chance
           lat       = tweet.lat
           lng       = tweet.lon
