@@ -3,7 +3,7 @@ This is a small project I put together to experiment with the Twitter Streaming 
 Demo
 ====
 
-I've taken down the live demo due to bandwidth limitations. Please see the instructions below to get this running on your own computer!
+A demo is running at http://brandontilley.com:8080. Please feel free to contact me if the demo goes down!
 
 Getting it to Work for You
 ==========================
