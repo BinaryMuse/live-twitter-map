@@ -17,9 +17,11 @@ You can run this on your own if you have Node.js installed.
 
 3. Run the server using your Twitter application credentials:
 
-        TWITTER_KEY=consumer_key TWITTER_SECRET=consumer_secret TWITTER_TOKEN=access_token TWITTER_TOKEN_SECRET=access_token_secret ./bin/twimap.js
+        TWITTER_KEY=consumer_key TWITTER_SECRET=consumer_secret TWITTER_TOKEN=access_token TWITTER_TOKEN_SECRET=access_token_secret npm start
 
-   You'll need to register for an application at https://dev.twitter.com/apps/new to receive the relevant credentials.
+   You'll need to register for an application at https://dev.twitter.com/apps/new to receive a consumer key and a consumer secret. Then, click 'Create my access token' to receive an access token and an access token secret.
+
+   ![Twitter Application Registration](tw_ss.png)
 
 By default the server binds to port 8080, so you can check it out at [http://localhost:8080](http://localhost:8080).
 
