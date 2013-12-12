@@ -1,6 +1,7 @@
 fs      = require 'fs'
 sys     = require 'sys'
 path    = require 'path'
+http    = require 'http'
 express = require 'express'
 io      = require 'socket.io'
 twitter = require 'ntwitter'
@@ -19,18 +20,18 @@ exports.LiveTwitterMap = class LiveTwitterMap
     @backlog = []
 
   create_web_server: (port) =>
-    pubDir = path.join path.dirname(fs.realpathSync(__filename)), './public'
+    pubDir = path.resolve __dirname + '/public'
     # Set up the Express web server
-    app = express.createServer()
+    app = express()
     app.configure ->
       app.use express.static pubDir
     # The client web page
     app.get '/', (req, res) ->
       res.sendfile path.join pubDir, "client.htm"
-    app.listen port
+    server = http.createServer(app).listen port
 
     # Attach Socket.IO to the web server
-    @socket = io.listen app
+    @socket = io.listen server
     @socket.set 'log level', 1
     @socket.on 'connection', (socket) =>
       console.log "New connection"
