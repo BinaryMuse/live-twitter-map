@@ -59,7 +59,7 @@ exports.LiveTwitterMap = class LiveTwitterMap
     @api.verifyCredentials (err, data) ->
       throw err if err?
       console.log "Authenticated with Twitter"
-    @api.stream 'statuses/filter', locations: [-127, 25, -58, 49], (stream) =>
+    @api.stream 'statuses/filter', locations: [-180, -90, 180, 90], (stream) =>
       @stream = stream
       stream.on 'error', (err) =>
         throw err

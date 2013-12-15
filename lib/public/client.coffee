@@ -100,6 +100,6 @@ $ ->
       marker.setMap null
       @infowindow = false if marker.auto_infowindow
 
-  # Create a new map with a 10% auto-show chance, centered on the US at zoom level 5
-  window.view = new LiveMapView new LatLng(40, -95), 5
+  # Create a new map with a 10% auto-show chance
+  window.view = new LiveMapView new LatLng(20, -20), 3
   window.Map  = new LiveMap 10, view

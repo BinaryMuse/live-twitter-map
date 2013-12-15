@@ -1,4 +1,4 @@
-This is a small project I put together to experiment with the Twitter Streaming API. It pulls in all the Tweets in (approximately) the continental United States and displays them in real time on a map.
+This is a small project I put together to experiment with the Twitter Streaming API. It pulls in all the geolocated tweets from the streaming API and displays them in real time on a map.
 
 Demo
 ====
